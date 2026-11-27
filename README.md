@@ -1,97 +1,111 @@
-# Beyond Pixel Fidelity: Quantifying Autopoiesis in Perturbed Neural Cellular Automata
+<div align="center">
+
+# Beyond Pixel Fidelity
+### Information-Theoretic Quantification of Autopoiesis in Perturbed Neural Cellular Automata
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24577198.svg)](https://doi.org/10.5281/zenodo.24577198)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Preprint](https://img.shields.io/badge/Paper-Preprint%20PDF-b31b1b.svg)](paper/autopoiesis_nca_preprint.pdf)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11+-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
+[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-EE4C2C.svg?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-F59E0B.svg)](LICENSE)
 
-Official reproducible research repository for the paper:
-> **"Beyond Pixel Fidelity: Information-Theoretic Quantification of Autopoiesis in Perturbed Neural Cellular Automata"**  
-> Harsh Diwan · [Read the Preprint PDF](paper/autopoiesis_nca_preprint.pdf)
+**Harsh Diwan** · Dayananda Sagar University, Bengaluru, India  
+[`harsh-diwan@proton.me`](mailto:harsh-diwan@proton.me) · [Read the 4-Page Preprint (PDF)](paper/autopoiesis_nca_preprint.pdf)
 
----
-
-## Visual & Information-Theoretic Results
-
-![Visual and Causal Dynamics of Membrane Regeneration](docs/fig1_regeneration.png)
-*Figure 1: RGBA rollouts after an excision lesion $\mathcal{E}_r$ ($r=6$) at $t=96$. Intact **M3: Regen-NCA** regenerates its membrane by $t=160$, whereas severing hidden interface channels (**M4: Severed-NCA**) completely arrests repair despite identical initial pigmentation.*
-
-![Information-Theoretic Signature of Autopoiesis](docs/fig2_te_phase.png)
-*Figure 2: (a) Rolling-window interior-to-boundary Transfer Entropy $\text{TE}_{\text{int}\to\text{bnd}}(t)$ showing a transient signaling surge in **M3** during acute wound closure. (b) Steady-state membrane fidelity ($1 - \mathcal{L}_{\text{L2}}^{\text{bnd}}$) under continuous boundary noise $\sigma \in [0.0, 0.20]$.*
+</div>
 
 ---
 
-## Converged 5-Seed Ablation Summary (6,000 Steps)
+> [!IMPORTANT]
+> **Core Hypothesis:** Static pixel loss ($\mathcal{L}_{\text{L2}}$) cannot distinguish an inert frozen pattern from a living, self-maintaining system. By partitioning a 16-channel Neural Cellular Automaton into an interior core ($\Omega_{\text{int}}$) and bounding membrane ($\Omega_{\text{bnd}}$), we show that wound regeneration is causally driven by directed interior-to-boundary Transfer Entropy ($\text{TE}_{\text{int}\to\text{bnd}}$).
 
-Evaluated across 5 fixed random seeds (`[42, 101, 202, 303, 404]`, mean $\pm$ std) from `results/ablation_summary.csv`:
+---
 
-| Variant | Training / Test Intervention | Clean $\mathcal{L}_{\text{L2}}$ ($t=96$) | Post-Lesion $\mathcal{L}_{\text{L2}}$ ($t=160$) | $\text{TE}_{\text{int} \to \text{bnd}}$ (nats) | Recovery $\rho_{\text{rec}}$ |
-|---|---|---|---|---|---|
-| **M1: `Grow-NCA`** | Single-seed rollout only (no pool, no lesions) | $0.001 \pm 0.002$ | $0.031 \pm 0.036$ | $0.024 \pm 0.018$ | $0.486 \pm 0.441$ |
-| **M2: `Persist-NCA`** | Sample pool ($N=1024$), zero perturbations | $0.039 \pm 0.051$ | $0.041 \pm 0.050$ | $0.026 \pm 0.023$ | $0.397 \pm 0.381$ |
-| **M3: `Regen-NCA`** | Sample pool + random circular excisions ($r \in [4, 8]$) | $0.002 \pm 0.001$ | **$0.002 \pm 0.001$** | $0.012 \pm 0.008$ | **$0.863 \pm 0.075$** |
-| **M4: `Severed-NCA`** | Trained `Regen-NCA`, hidden channels zeroed at interface $r \in [9.5, 11]$ | $0.002 \pm 0.001$ | $0.027 \pm 0.009$ | $0.004 \pm 0.004$ | $-1.077 \pm 0.612$ |
-| **M5: `Noise-NCA`** | Sample pool + continuous boundary noise ($\sigma = 0.05$) | $0.047 \pm 0.027$ | $0.072 \pm 0.028$ | $0.000 \pm 0.000$ | $0.150 \pm 0.085$ |
+## Visual & Causal Evidence
 
-- **Causal Proof (`M3` vs. `M4`):** Both share identical weights and clean steady-state loss ($0.002 \pm 0.001$), yet severing hidden interface signaling collapses wound recovery from **+86.3%** to **-107.7%** and cuts Transfer Entropy threefold (`0.012` $\to$ `0.004` nats).
+<p align="center">
+  <img src="docs/fig1_regeneration.png" width="88%" alt="Visual and Causal Dynamics of Membrane Regeneration"/>
+  <br/>
+  <sub><b>Figure 1: Visual and Causal Dynamics of Membrane Regeneration.</b> RGBA rollouts after an excision lesion (<i>r</i> = 6) at <i>t</i> = 96. Intact <b>M3: Regen-NCA</b> (top) reconstructs its membrane by <i>t</i> = 160, whereas severing hidden interface channels in <b>M4: Severed-NCA</b> (bottom) completely arrests repair despite identical initial pigmentation.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/fig2_te_phase.png" width="88%" alt="Information-Theoretic Signature of Autopoiesis"/>
+  <br/>
+  <sub><b>Figure 2: Information-Theoretic Signature of Autopoiesis.</b> <b>(a)</b> Rolling-window Transfer Entropy TE<sub>int→bnd</sub>(<i>t</i>) showing a localized signaling surge in <b>M3</b> during acute wound closure (<i>t</i> ∈ [96, 115]), whereas unregularized <b>M1</b> exhibits late post-horizon drift. <b>(b)</b> Steady-state membrane fidelity (1 − L2<sub>bnd</sub>) under continuous boundary noise <i>σ</i> ∈ [0.0, 0.20].</sub>
+</p>
+
+---
+
+## Converged 5-Seed Ablation Results (`6,000` Steps)
+
+Evaluated across **5 fixed seeds** (`[42, 101, 202, 303, 404]`, mean ± std) from [`results/ablation_summary.csv`](results/ablation_summary.csv):
+
+| Variant | Training / Test Intervention | Clean $\mathcal{L}_{\text{L2}}$ ($t=96$) | Post-Lesion $\mathcal{L}_{\text{L2}}$ ($t=160$) | $\text{TE}_{\text{int}\to\text{bnd}}$ (nats) | Recovery $\rho_{\text{rec}}$ |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **M1: `Grow-NCA`** | Single-seed rollout only (no pool, no lesions) | `0.001 ± 0.002` | `0.031 ± 0.036` | `0.024 ± 0.018` | `0.486 ± 0.441` |
+| **M2: `Persist-NCA`** | Sample pool ($N=1024$), zero perturbations | `0.039 ± 0.051` | `0.041 ± 0.050` | `0.026 ± 0.023` | `0.397 ± 0.381` |
+| **M3: `Regen-NCA`** | Sample pool + random excisions ($r \in [4, 8]$) | `0.002 ± 0.001` | **`0.002 ± 0.001`** | `0.012 ± 0.008` | **`0.863 ± 0.075`** |
+| **M4: `Severed-NCA`** | Trained `Regen-NCA`, hidden interface zeroed ($r \in [9.5, 11]$) | `0.002 ± 0.001` | `0.027 ± 0.009` | `0.004 ± 0.004` | `-1.077 ± 0.612` |
+| **M5: `Noise-NCA`** | Sample pool + boundary noise ($\sigma = 0.05$) | `0.047 ± 0.027` | `0.072 ± 0.028` | `0.000 ± 0.000` | `0.150 ± 0.085` |
+
+- **Causal Proof (`M3` vs. `M4`):** Identical weights and clean morphology (`0.002 ± 0.001`), yet severing hidden interface signaling collapses recovery from **`+86.3%`** to **`-107.7%`** and cuts Transfer Entropy threefold (`0.012` → `0.004` nats).
 - **Noise Resilience (`M5`):** Retains **`0.99`** steady-state membrane fidelity at $\sigma = 0.10$.
 
 ---
 
-## Overview
+## Method & Architecture
 
-Growing Neural Cellular Automata (NCAs) demonstrate remarkable self-organizing capabilities, yet standard evaluation benchmarks quantify morphogenesis almost exclusively via Euclidean pixel loss ($\mathcal{L}_{\text{L2}}$). This metric conflates an inert static image with an autopoietic, self-maintaining organism.
-
-This repository operationalizes Maturana & Varela's concept of **autopoiesis** and Friston's **Markov blanket** formalism:
-1. **Two-Compartment Organism Geometry:** Partitions an active metabolic core ($\Omega_{\text{int}}$) from a bounding membrane ($\Omega_{\text{bnd}}$) in a 16-channel lattice (4 visible RGBA channels + 12 latent signaling channels).
-2. **Transfer Entropy Metric ($\text{TE}_{\text{int} \to \text{bnd}}$):** Quantifies directed causal information flow from interior to membrane via non-parametric Kraskov–Stögbauer–Grassberger (KSG) estimation on SVD-reduced trajectories.
-3. **Causal Interface Severing (`M4`):** Proves that membrane regeneration requires interior-to-boundary signaling rather than local edge rules.
+- **Compact 16-Channel NCA (`8,320` params):** Fixed depthwise Sobel + Identity perception (`48` channels) → `1×1 Conv` (`128`, ReLU) → zero-initialized `1×1 Conv` (`16`), gated by asynchronous stochastic firing (`p = 0.5`) and neighborhood viability (`α > 0.1`).
+- **Two-Compartment Markov Blanket:** Teal interior core ($\Omega_{\text{int}}$, $r \le 10$), orange bounding membrane ($\Omega_{\text{bnd}}$, $10 < r \le 16$), and 1-pixel interface ($\Omega_{\text{interface}}$, $9.5 \le r \le 11$).
+- **KSG Transfer Entropy:** Spatial mean hidden trajectories projected via SVD ($d = 2$) and evaluated using non-parametric Kraskov–Stögbauer–Grassberger estimation ($k = 4$, Chebyshev $L_\infty$).
 
 ---
 
-## Repository Structure
+## Quickstart & Reproducibility
+
+```bash
+git clone https://github.com/realharshdiwan/autopoiesis-nca.git
+cd autopoiesis-nca
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+make test       # Run unit & invariant tests (5/5)
+make smoke      # Fast end-to-end CPU smoke test (< 5 min)
+make train-all  # Full 5-seed, 6,000-step GPU matrix
+make paper      # Regenerate figures and compile PDF
+```
+
+<details>
+<summary><b>Repository Structure</b></summary>
 
 ```text
 autopoiesis-nca/
-├── requirements.txt          # PyTorch, NumPy, SciPy, Matplotlib, Pandas, PyTest
-├── Makefile                  # Automated build and test pipeline targets
 ├── CITATION.cff              # Zenodo / academic citation metadata
 ├── LICENSE                   # MIT License
-├── docs/                     # 300-DPI PNG figures for README display
+├── Makefile                  # Automated build, test, and paper targets
+├── requirements.txt          # PyTorch, NumPy, SciPy, Matplotlib, Pandas, PyTest
+├── docs/                     # 300-DPI PNG figures for GitHub README
 ├── src/
-│   ├── __init__.py
-│   ├── target.py             # Two-compartment organism mask (Omega_int, Omega_bnd, Omega_env)
-│   ├── model.py              # Stochastic 16-channel NCA2D (8,320 trainable parameters)
-│   ├── perturbations.py      # Excision lesions E_r and continuous boundary noise G_sigma
+│   ├── target.py             # Two-compartment Markov blanket masks
+│   ├── model.py              # Stochastic 16-channel NCA2D (8,320 params)
+│   ├── perturbations.py      # Excision lesions E_r and boundary noise G_sigma
 │   ├── metrics.py            # Morphological L2, KSG Transfer Entropy, recovery ratio
-│   └── train.py              # Experience-replay sample pool trainer for all 4 regimes
+│   └── train.py              # Deterministic sample-pool trainer
 ├── tests/
-│   └── test_sanity.py        # PyTest suite verifying model invariants, KSG TE, causal masking
+│   └── test_sanity.py        # Unit tests for invariants, KSG TE, causal masking
 ├── scripts/
-│   ├── run_ablations.py      # Evaluates M1..M5 across 5 seeds -> results/ablation_table.tex
+│   ├── run_ablations.py      # 5-seed evaluation -> results/ablation_table.tex
 │   ├── generate_paper_macros.py
-│   └── plot_figures.py       # Generates publication 300-DPI PDF/PNG figures
+│   └── plot_figures.py       # 300-DPI PDF/PNG figure generation
 ├── paper/
-│   ├── main.tex              # Double-blind manuscript -> main_blind.pdf
+│   ├── main.tex              # Anonymized double-blind manuscript -> main_blind.pdf
 │   ├── main_preprint.tex     # Preprint manuscript -> autopoiesis_nca_preprint.pdf
-│   └── references.bib        # Complete BibTeX bibliography
-└── results/                  # Generated CSV tables, LaTeX tables, and evaluation trajectories
+│   └── references.bib        # Verified BibTeX bibliography
+└── results/                  # 5-seed CSVs, NPZ trajectories, and LaTeX macros/tables
 ```
 
----
-
-## Quickstart
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-make test      # Run unit tests
-make smoke     # Fast CPU smoke test (< 5 min)
-make train-all # Full 5-seed, 6,000-step GPU matrix
-make paper     # Regenerate figures and compile manuscript
-```
+</details>
 
 ---
 
