@@ -1,6 +1,6 @@
 # Beyond Pixel Fidelity: Quantifying Autopoiesis in Perturbed Neural Cellular Automata
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24577198.svg)](https://doi.org/10.5281/zenodo.24577198)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0+-ee4c2c.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -102,6 +102,7 @@ make paper     # Regenerate figures and compile manuscript
   title={Beyond Pixel Fidelity: Information-Theoretic Quantification of Autopoiesis in Perturbed Neural Cellular Automata},
   author={Diwan, Harsh},
   year={2026},
+  doi={10.5281/zenodo.24577198},
   url={https://github.com/realharshdiwan/autopoiesis-nca}
 }
 ```
