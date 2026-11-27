@@ -1,0 +1,179 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[top=0.50in,bottom=0.50in,left=0.62in,right=0.62in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{subcaption}
+
+\setlength{\textfloatsep}{5pt plus 1pt minus 1pt}
+\setlength{\floatsep}{4pt plus 1pt minus 1pt}
+\setlength{\intextsep}{4pt plus 1pt minus 1pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{0pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    citecolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\IfFileExists{metrics_macros.tex}{\input{metrics_macros.tex}}{\input{../results/metrics_macros.tex}}
+
+\title{\textbf{Beyond Pixel Fidelity: Information-Theoretic Quantification of Autopoiesis in Perturbed Neural Cellular Automata}}
+
+\author{
+  Harsh Diwan \\
+  Dayananda Sagar University, Bengaluru, India \\
+  \texttt{harsh-diwan@proton.me} \\
+  \texttt{github.com/realharshdiwan/autopoiesis-nca}
+}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Growing Neural Cellular Automata (NCAs) demonstrate remarkable self-organization, yet existing benchmarks assess morphogenesis almost exclusively through static Euclidean pixel loss ($\mathcal{L}_{\text{L2}}$). This metric conflates inert frozen patterns with authentic homeostatic self-maintenance. Grounded in Maturana and Varela's theory of \textit{autopoiesis} and Friston's Markov blanket formalism, we present a rigorous information-theoretic framework to decouple visual appearance from active self-regeneration. We construct a synthetic two-compartment organism partitioning metabolic interior dynamics ($\Omega_{\text{int}}$) from a bounding membrane ($\Omega_{\text{bnd}}$). Under controlled physical lesions and continuous boundary noise, we measure directed interior-to-boundary Transfer Entropy ($\text{TE}_{\text{int} \to \text{bnd}}$) via non-parametric Kraskov--St\"ogbauer--Grassberger (KSG) estimator. Across five controlled training regimes, we demonstrate that models achieving identical unperturbed loss ($\mathcal{L}_{\text{L2}} \le \cleanLtwoThreshold$) diverge radically in causal signaling ($\text{TE} \approx \teMone$ vs. $\teMthree$~nats) and wound recovery ($\rho_{\text{rec}} \approx \rhoMone$ vs. $\rhoMthree$). Crucially, severing hidden communication channels exclusively along the inner interface halts boundary regeneration while leaving visible pigmentation intact, proving that autopoietic survival is driven by causal information transfer rather than local edge rules.
+\end{abstract}
+
+\section{Introduction \& Philosophical Motivation}
+
+Self-organizing complex systems possess the distinctive capacity to generate and preserve coherent macroscopic morphology through purely decentralized local interactions~\citep{maturana1980autopoiesis,mordvintsev2020growing}. Neural Cellular Automata (NCAs) have emerged as a premier computational model of artificial morphogenesis, capable of growing complex multi-channel patterns from a single activated seed cell~\citep{mordvintsev2020growing,randazzo2020adversarial}. 
+
+Despite their impressive demonstrations of visual plasticity, standard NCA training and evaluation pipelines suffer from a fundamental \textbf{evaluation gap}: system performance is almost universally quantified via mean squared error ($\mathcal{L}_{\text{L2}}$) against a static target image. However, an L2 loss over RGB pixels cannot distinguish between an organism actively expending signaling energy to counteract entropy and an inert crystal whose state is frozen in a passive basin of attraction. Under unperturbed conditions, both regimes yield near-zero error. Yet when subjected to mechanical laceration or stochastic environmental influx, their fates diverge catastrophically: the passive system collapses irreversibly, whereas the active system mobilizes decentralized regulatory pathways to reconstruct its boundaries.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.70\textwidth]{fig1_regeneration.pdf}
+\caption{\textbf{Visual and Causal Dynamics of Membrane Regeneration.} RGBA rollouts over discrete time steps $t \in \{96, 104, 128, 160\}$. An excision lesion $\mathcal{E}_r$ ($r=6$) is inflicted at $t=96$ on the bounding membrane. \textbf{Top row:} In intact autopoietic models (\textbf{M3: Regen-NCA}), internal signaling channels orchestrate coordinated outward cell proliferation and complete structural recovery by $t=160$. \textbf{Bottom row:} In the causal interface ablation (\textbf{M4: Severed-NCA}), hidden signaling channels $s^{(4:15)}$ are set to zero exclusively along the inner interface ring $\Omega_{\text{interface}}$ at test time; despite identical initial RGBA states, boundary reconstruction is completely arrested.}
+\label{fig:regeneration}
+\end{figure*}
+
+This operational dichotomy was articulated in theoretical biology by \citet{varela1974autopoiesis} and \citet{maturana1980autopoiesis} under the concept of \textit{autopoiesis}: a living entity is organized as a network of production processes that regenerates and realizes the very topological boundary (membrane) that delimits it from the exterior medium. In modern physics and computational neuroscience, this boundary is formalized as a \textit{Markov blanket}~\citep{friston2013life,pio2022active,fields2022free}, which partitions the state space into internal, active/sensory (blanket), and external environmental states. Under this view, authentic self-maintenance requires directional, non-trivial information flow from the metabolic core to the protective membrane.
+
+In this work, we translate the biological principle of autopoiesis into an operational, information-theoretic benchmark for Neural Cellular Automata. Our primary contributions are:
+\begin{enumerate}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+    \item \textbf{A Two-Compartment Markov Blanket Testbed:} We design a synthetic organism topology with an explicit core interior ($\Omega_{\text{int}}$), bounding membrane ($\Omega_{\text{bnd}}$), and external medium ($\Omega_{\text{env}}$), separating observable morphogenesis from 12 latent signaling channels.
+    \item \textbf{Operational Information-Theoretic Metric:} We formalize interior-to-boundary Transfer Entropy ($\text{TE}_{\text{int}\to\text{bnd}}$) using the Kraskov--St\"ogbauer--Grassberger (KSG) estimator on dimension-reduced latent trajectories, proving that causal information transfer directly predicts post-lesion recovery.
+    \item \textbf{Causal Interface Severing Protocol:} We introduce an in-silico causal lesion (\textbf{M4: Severed-NCA}) that suppresses latent communication at the boundary interface while leaving visible pigmentation untouched, demonstrating that membrane restoration is causally mediated by internal regulatory signaling.
+\end{enumerate}
+
+\section{Model Architecture \& Autopoietic Metrics}
+
+\IfFileExists{ablation_table.tex}{\input{ablation_table.tex}}{\input{../results/ablation_table.tex}}
+
+\subsection{Stochastic Neural Cellular Automata}
+
+Let $\Lambda = \{1, \dots, H\} \times \{1, \dots, W\}$ ($H = W = 64$) denote a 2D regular lattice with periodic or zero-padded boundary conditions. Each cell $x \in \Lambda$ at discrete time step $t \in \mathbb{N}$ contains a state vector $s_t(x) \in \mathbb{R}^C$ ($C = 16$), partitioned into visible channels $s_t^{(0:3)}(x) = (R, G, B, \alpha)$ and hidden regulatory channels $s_t^{(4:15)}(x) \in \mathbb{R}^{12}$. The alpha channel $\alpha_t(x) \in [0, 1]$ represents physical cell viability.
+
+\paragraph{Perception:} Each cell aggregates its $3 \times 3$ Moore neighborhood $\mathcal{N}_3(x)$ via depthwise 2D convolutions using fixed identity $K_I$ and normalized Sobel horizontal/vertical derivative operators $K_x, K_y$:
+\begin{equation}
+z_t(x) = \big[ s_t(x),\; (K_x * s_t)(x),\; (K_y * s_t)(x) \big] \in \mathbb{R}^{3C}.
+\end{equation}
+
+\paragraph{Update MLP \& Gating:} A multi-layer perceptron $f_\theta$ parameterizes the state differential. The network consists of a $1 \times 1$ convolution mapping $\mathbb{R}^{48} \to \mathbb{R}^{128}$, a ReLU activation, and a $1 \times 1$ convolution mapping $\mathbb{R}^{128} \to \mathbb{R}^{16}$. Crucially, the final layer is initialized to exact zeros ($\mathbf{W}_2 = \mathbf{0}$), ensuring identity dynamics at initialization. 
+
+To mimic decentralized biological updates, state transitions are gated by an asynchronous stochastic mask $m_t(x) \sim \text{Bernoulli}(p_{\text{fire}})$ ($p_{\text{fire}} = 0.5$) and an alive viability mask $\mathbf{1}_{\text{alive}}(x, t)$:
+\begin{equation}
+s_{t+1}(x) = \mathbf{1}_{\text{alive}}(x, t) \odot \Big( s_t(x) + m_t(x) \odot f_\theta(z_t(x)) \Big),
+\end{equation}
+where $\mathbf{1}_{\text{alive}}(x, t) = \mathbb{I}[\max_{y \in \mathcal{N}_3(x)} \alpha_t(y) > \tau_{\text{alive}}]$ with threshold $\tau_{\text{alive}} = 0.1$. Hidden channels $s_{t+1}^{(4:15)}$ are clamped to $[-5.0, 5.0]$ to enforce numerical stability over extended rollouts ($T > 300$).
+
+\subsection{Two-Compartment Geometry \& Stressors}
+
+We establish a synthetic target organism $y^* \in [0, 1]^{4 \times H \times W}$ centered at $(H/2, W/2) = (32, 32)$ with Euclidean radius $r(x) = \|x - (32, 32)\|_2$:
+\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+    \item \textbf{Interior Core ($\Omega_{\text{int}}$):} $r \le 10.0$, assigned target RGBA $(0.15, 0.65, 0.70, 1.0)$.
+    \item \textbf{Bounding Membrane ($\Omega_{\text{bnd}}$):} $10.0 < r \le 16.0$, assigned target RGBA $(0.85, 0.45, 0.20, 1.0)$.
+    \item \textbf{External Environment ($\Omega_{\text{env}}$):} $r > 16.0$, where target $\alpha^*(x) = 0.0$.
+    \item \textbf{Interface Ring ($\Omega_{\text{interface}}$):} $9.5 \le r \le 11.0$, defining the 1-to-2 pixel boundary separating interior and membrane.
+\end{itemize}
+
+During evaluation rollouts, we subject the organism to two controlled environmental stressors:
+\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+    \item \textbf{Excision Lesion ($\mathcal{E}_r$):} Zeroes all 16 channels within a Euclidean ball $B_r(x_0)$ of radius $r \in \{4, 6, 8\}$ centered at a randomly chosen membrane site $x_0 \in \Omega_{\text{bnd}}$ at step $t = T_{\text{grow}} = 96$.
+    \item \textbf{Continuous Boundary Noise ($\mathcal{G}_\sigma$):} Adds i.i.d. Gaussian perturbations $\epsilon_t(x) \sim \mathcal{N}(0, \sigma^2 \mathbf{I}_{16})$ at every time step $t$ exclusively to cells $x \in \Omega_{\text{bnd}}$.
+\end{itemize}
+
+\subsection{Quantifying Autopoietic Organization}
+
+To move beyond morphological appearance, we evaluate three complementary metrics:
+\begin{enumerate}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+    \item \textbf{Morphological Pixel Error ($\mathcal{L}_{\text{L2}}$):} Mean squared error over visible RGBA channels:
+    \begin{equation}
+    \mathcal{L}_{\text{L2}}(t) = \frac{1}{4 |\Lambda|} \sum_{x \in \Lambda} \| s_t^{(0:3)}(x) - y^*(x) \|_2^2.
+    \end{equation}
+    \item \textbf{Boundary Recovery Ratio ($\rho_{\text{rec}}$):} Given post-lesion step $T_{\text{grow}}^+$ and healed step $T_{\text{grow}} + \Delta T_{\text{heal}}$ ($\Delta T_{\text{heal}} = 64$):
+    \begin{equation}
+    \rho_{\text{rec}} = 1 - \frac{\mathcal{L}_{\text{L2}}^{\text{bnd}}(T_{\text{grow}} + \Delta T_{\text{heal}})}{\max\left(\mathcal{L}_{\text{L2}}^{\text{bnd}}(T_{\text{grow}}^+),\, 10^{-8}\right)}.
+    \end{equation}
+    \item \textbf{Interior-to-Boundary Transfer Entropy ($\text{TE}_{\text{int}\to\text{bnd}}$):} Directed information flow from core hidden channels $\bar{S}_{\text{int}}$ to membrane channels $\bar{S}_{\text{bnd}}$, conditioned on membrane history:
+    \begin{equation}
+    \text{TE}_{\text{int} \to \text{bnd}} = I\big(\bar{S}_{\text{bnd},\, t+1};\; \bar{S}_{\text{int},\, t} \;\big|\; \bar{S}_{\text{bnd},\, t}\big).
+    \end{equation}
+    We compute spatial mean hidden vectors $\bar{S}_{\text{int}, t} = \frac{1}{|\Omega_{\text{int}}|} \sum_{x \in \Omega_{\text{int}}} s_t^{(4:15)}(x) \in \mathbb{R}^{12}$ and $\bar{S}_{\text{bnd}, t} = \frac{1}{|\Omega_{\text{bnd}}|} \sum_{x \in \Omega_{\text{bnd}}} s_t^{(4:15)}(x) \in \mathbb{R}^{12}$. To overcome sample sparsity in high dimensions, both trajectories are projected to their top $d=2$ principal components via singular value decomposition (SVD). Transfer Entropy is then estimated via the non-parametric Kraskov--St\"ogbauer--Grassberger (KSG) estimator~\citep{kraskov2004estimating,schreiber2000measuring} with $k=4$ nearest neighbors in Chebyshev distance ($L_\infty$).
+\end{enumerate}
+
+\section{Experiments \& Ablation Analysis}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.66\textwidth]{fig2_te_phase.pdf}
+\caption{\textbf{Information-Theoretic Signature of Autopoiesis.} \textbf{(a)} Rolling-window Transfer Entropy $\text{TE}_{\text{int}\to\text{bnd}}(t)$ ($W=30$) across the rollout horizon. Following the excision lesion at $t=96$, \textbf{M3: Regen-NCA} exhibits a pronounced transient signaling surge (peaking at $\text{TE} = \peakTeMthree$~nats) that drives structural regeneration and subsides as the membrane stabilizes. In contrast, interface severing (\textbf{M4}) suppresses sustained repair signaling, while unregularized \textbf{M1} exhibits erratic post-horizon drift. \textbf{(b)} Steady-state membrane fidelity ($1 - \mathcal{L}_{\text{L2}}^{\text{bnd}}$) under varying continuous membrane noise intensity $\sigma \in [0.0, 0.20]$. Shaded bands represent $\pm 1$ standard deviation across 5 independent seeds.}
+\label{fig:te_phase}
+\end{figure*}
+
+\subsection{Experimental Protocol}
+
+We train five distinct NCA variants across five fixed random seeds ($[42, 101, 202, 303, 404]$). Each model has exactly $8,320$ trainable parameters and is optimized with Adam ($\text{lr} = 2 \times 10^{-3}$, decayed by $0.25\times$ at step 4,000) using gradient clipping at norm $2.0$:
+\begin{itemize}\setlength{\itemsep}{1pt}\setlength{\parskip}{0pt}
+    \item \textbf{M1: Grow-NCA:} Single-seed rollouts ($T \sim \mathcal{U}[64, 96]$) without experience replay or perturbations.
+    \item \textbf{M2: Persist-NCA:} Replay pool ($N=1024$, batch $B=8$), replacing the highest-loss sample with a fresh seed.
+    \item \textbf{M3: Regen-NCA:} Replay pool with excision lesions ($r \in [4, 8]$) applied to 50\% of batch items during training rollouts.
+    \item \textbf{M4: Severed-NCA:} Evaluates trained \textbf{M3} checkpoints, but zeroes out hidden channels $s^{(4:15)}$ at $\Omega_{\text{interface}}$ at test time after the lesion.
+    \item \textbf{M5: Noise-NCA:} Replay pool with continuous boundary noise ($\sigma=0.05$) injected during training rollouts.
+\end{itemize}
+
+\subsection{Morphological Accuracy vs. Autopoietic Closure}
+
+Table~\ref{tab:ablation} presents the comprehensive evaluation results. Under unperturbed conditions at $t=96$, all five models achieve low morphological pixel loss ($\mathcal{L}_{\text{L2}} \le \cleanLtwoThreshold$), confirming that static visual fidelity is blind to the underlying dynamical regime.
+
+However, upon receiving an excision lesion $\mathcal{E}_r$ ($r=6$), the behavioral trajectories diverge sharply. \textbf{M1: Grow-NCA} exhibits high instability across seeds ($\rho_{\text{rec}} = \rhoMone \pm 0.44$, post-lesion $\mathcal{L}_{\text{L2}} = \postLtwoMone$) with noisy post-horizon drift ($\text{TE} = \teMone$~nats). \textbf{M2: Persist-NCA} similarly struggles with acute repair ($\rho_{\text{rec}} = \rhoMtwo$). Only \textbf{M3: Regen-NCA} achieves consistent, near-complete anatomical recovery ($\rho_{\text{rec}} = \rhoMthree$, post-lesion $\mathcal{L}_{\text{L2}} = \postLtwoMthree$, $\text{TE} = \teMthree$~nats).
+
+Crucially, severing internal interface signaling in \textbf{M4: Severed-NCA} collapses recovery to $\rho_{\text{rec}} = \rhoMfour$ and reduces Transfer Entropy threefold ($\text{TE} = \teMfour$~nats), confirming that self-repair is actively governed by directed causal information transfer originating in the metabolic core.
+
+\subsection{Causal Severing \& Transient Signaling Dynamics}
+
+To prove that membrane regeneration is causally downstream of interior signaling rather than autonomous local edge rules, we examine \textbf{M4: Severed-NCA}. Here, identical trained \textbf{M3} weights are rolled out, but latent channels $s^{(4:15)}$ are set to zero exclusively along the 1-pixel boundary interface $\Omega_{\text{interface}}$ for $t \ge 96$. As shown in Figure~\ref{fig:regeneration}, severing internal communication immediately arrests boundary regeneration. The wound site remains permanently excised ($\rho_{\text{rec}} = \rhoMfour$, Table~\ref{tab:ablation}), while Transfer Entropy collapses ($\text{TE} = \teMfour$~nats). Because visible RGBA states on the interface remain intact, this failure cannot be attributed to visual disconnection, providing decisive causal evidence for internal autopoietic regulation.
+
+Figure~\ref{fig:te_phase}a tracks rolling-window $\text{TE}_{\text{int}\to\text{bnd}}(t)$. Prior to injury ($t < 96$), baseline signaling is low. Immediately following lesion impact at $t=96$, \textbf{M3} exhibits a transient surge in Transfer Entropy peaking at $\peakTeMthree$~nats, tightly localized to the acute wound-closure window ($t \in [96, 115]$) before subsiding as structural integrity is restored. By contrast, \textbf{M1}'s late spikes in Figure~\ref{fig:te_phase}a reflect unregularized post-horizon runaway drift beyond its $t \le 96$ training window. Under continuous membrane noise $\sigma$ (Figure~\ref{fig:te_phase}b), \textbf{M5: Noise-NCA} demonstrates notable resilience, retaining steady-state membrane fidelity $\approx \fidMfiveTen$ at $\sigma = 0.10$.
+
+\section{Discussion, Limitations \& Conclusion}
+
+We demonstrated that Euclidean pixel metrics ($\mathcal{L}_{\text{L2}}$) fail to quantify autopoietic self-maintenance in decentralized computational systems. By formulating a two-compartment Markov blanket architecture and applying non-parametric Transfer Entropy ($\text{TE}_{\text{int}\to\text{bnd}}$), we operationalized Maturana and Varela's theoretical principles for Neural Cellular Automata. 
+
+\paragraph{Limitations \& Future Work:} While our KSG estimator on SVD-reduced spatial averages captures global compartment coupling, it compresses traveling radial waves and localized signaling fronts. Future work will investigate continuous spatiotemporal transfer entropy fields and multi-organism ecological competition.
+
+\paragraph{Conclusion:} Life-like self-repair is not a passive artifact of pattern convergence, but an active, causally directed process of information transfer. Quantifying organizational closure provides a rigorous foundation for evaluating autonomy and resilience in synthetic biology and artificial life.
+
+\noindent\textbf{Author Note.} This work was conceived, implemented, and written independently by the author outside of coursework or external funding.
+
+\vspace{-4pt}
+\begingroup
+\small
+\setlength{\bibsep}{0pt}
+\bibliographystyle{plainnat}
+\bibliography{references}
+\endgroup
+
+\end{document}

@@ -1,0 +1,21 @@
+# Python / PyTorch caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# OS & Archives
+.DS_Store
+*.zip
+
+# Model checkpoints (large binaries / smoke artifacts)
+checkpoints/
+
+# LaTeX intermediate build files
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/main.pdf
+paper/main_preprint.pdf

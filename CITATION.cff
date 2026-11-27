@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software or paper, please cite it as below."
+title: "Beyond Pixel Fidelity: Information-Theoretic Quantification of Autopoiesis in Perturbed Neural Cellular Automata"
+version: 1.0.0
+date-released: 2026-11-27
+license: MIT
+repository-code: "https://github.com/realharshdiwan/autopoiesis-nca"
+authors:
+  - family-names: "Diwan"
+    given-names: "Harsh"
+    affiliation: "Dayananda Sagar University, Bengaluru, India"
+    email: "harsh-diwan@proton.me"
+keywords:
+  - neural cellular automata
+  - autopoiesis
+  - transfer entropy
+  - markov blanket
+  - artificial life
