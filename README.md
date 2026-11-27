@@ -16,8 +16,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Core Hypothesis:** Static pixel loss ($\mathcal{L}_{\text{L2}}$) cannot distinguish an inert frozen pattern from a living, self-maintaining system. By partitioning a 16-channel Neural Cellular Automaton into an interior core ($\Omega_{\text{int}}$) and bounding membrane ($\Omega_{\text{bnd}}$), we show that wound regeneration is causally driven by directed interior-to-boundary Transfer Entropy ($\text{TE}_{\text{int}\to\text{bnd}}$).
+> **Core Hypothesis:** Static pixel loss (<i>L</i><sub>2</sub>) cannot distinguish an inert frozen pattern from a living, self-maintaining system. By partitioning a 16-channel Neural Cellular Automaton into an interior core (Ω<sub>int</sub>) and bounding membrane (Ω<sub>bnd</sub>), we show that wound regeneration is causally driven by directed interior-to-boundary Transfer Entropy (TE<sub>int→bnd</sub>).
 
 ---
 
@@ -41,24 +40,24 @@
 
 Evaluated across **5 fixed seeds** (`[42, 101, 202, 303, 404]`, mean ± std) from [`results/ablation_summary.csv`](results/ablation_summary.csv):
 
-| Variant | Training / Test Intervention | Clean $\mathcal{L}_{\text{L2}}$ ($t=96$) | Post-Lesion $\mathcal{L}_{\text{L2}}$ ($t=160$) | $\text{TE}_{\text{int}\to\text{bnd}}$ (nats) | Recovery $\rho_{\text{rec}}$ |
+| Variant | Training / Test Intervention | Clean <i>L</i><sub>2</sub> (<i>t</i>=96) | Post-Lesion <i>L</i><sub>2</sub> (<i>t</i>=160) | TE<sub>int→bnd</sub> (nats) | Recovery <i>ρ</i><sub>rec</sub> |
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **M1: `Grow-NCA`** | Single-seed rollout only (no pool, no lesions) | `0.001 ± 0.002` | `0.031 ± 0.036` | `0.024 ± 0.018` | `0.486 ± 0.441` |
-| **M2: `Persist-NCA`** | Sample pool ($N=1024$), zero perturbations | `0.039 ± 0.051` | `0.041 ± 0.050` | `0.026 ± 0.023` | `0.397 ± 0.381` |
-| **M3: `Regen-NCA`** | Sample pool + random excisions ($r \in [4, 8]$) | `0.002 ± 0.001` | **`0.002 ± 0.001`** | `0.012 ± 0.008` | **`0.863 ± 0.075`** |
-| **M4: `Severed-NCA`** | Trained `Regen-NCA`, hidden interface zeroed ($r \in [9.5, 11]$) | `0.002 ± 0.001` | `0.027 ± 0.009` | `0.004 ± 0.004` | `-1.077 ± 0.612` |
-| **M5: `Noise-NCA`** | Sample pool + boundary noise ($\sigma = 0.05$) | `0.047 ± 0.027` | `0.072 ± 0.028` | `0.000 ± 0.000` | `0.150 ± 0.085` |
+| **M2: `Persist-NCA`** | Sample pool (<i>N</i> = 1024), zero perturbations | `0.039 ± 0.051` | `0.041 ± 0.050` | `0.026 ± 0.023` | `0.397 ± 0.381` |
+| **M3: `Regen-NCA`** | Sample pool + random excisions (<i>r</i> ∈ [4, 8]) | `0.002 ± 0.001` | **`0.002 ± 0.001`** | `0.012 ± 0.008` | **`0.863 ± 0.075`** |
+| **M4: `Severed-NCA`** | Trained `Regen-NCA`, hidden interface zeroed (<i>r</i> ∈ [9.5, 11]) | `0.002 ± 0.001` | `0.027 ± 0.009` | `0.004 ± 0.004` | `-1.077 ± 0.612` |
+| **M5: `Noise-NCA`** | Sample pool + boundary noise (<i>σ</i> = 0.05) | `0.047 ± 0.027` | `0.072 ± 0.028` | `0.000 ± 0.000` | `0.150 ± 0.085` |
 
 - **Causal Proof (`M3` vs. `M4`):** Identical weights and clean morphology (`0.002 ± 0.001`), yet severing hidden interface signaling collapses recovery from **`+86.3%`** to **`-107.7%`** and cuts Transfer Entropy threefold (`0.012` → `0.004` nats).
-- **Noise Resilience (`M5`):** Retains **`0.99`** steady-state membrane fidelity at $\sigma = 0.10$.
+- **Noise Resilience (`M5`):** Retains **`0.99`** steady-state membrane fidelity at <i>σ</i> = 0.10.
 
 ---
 
 ## Method & Architecture
 
 - **Compact 16-Channel NCA (`8,320` params):** Fixed depthwise Sobel + Identity perception (`48` channels) → `1×1 Conv` (`128`, ReLU) → zero-initialized `1×1 Conv` (`16`), gated by asynchronous stochastic firing (`p = 0.5`) and neighborhood viability (`α > 0.1`).
-- **Two-Compartment Markov Blanket:** Teal interior core ($\Omega_{\text{int}}$, $r \le 10$), orange bounding membrane ($\Omega_{\text{bnd}}$, $10 < r \le 16$), and 1-pixel interface ($\Omega_{\text{interface}}$, $9.5 \le r \le 11$).
-- **KSG Transfer Entropy:** Spatial mean hidden trajectories projected via SVD ($d = 2$) and evaluated using non-parametric Kraskov–Stögbauer–Grassberger estimation ($k = 4$, Chebyshev $L_\infty$).
+- **Two-Compartment Markov Blanket:** Teal interior core (Ω<sub>int</sub>, <i>r</i> ≤ 10), orange bounding membrane (Ω<sub>bnd</sub>, 10 < <i>r</i> ≤ 16), and 1-pixel interface (Ω<sub>interface</sub>, 9.5 ≤ <i>r</i> ≤ 11).
+- **KSG Transfer Entropy:** Spatial mean hidden trajectories projected via SVD (<i>d</i> = 2) and evaluated using non-parametric Kraskov–Stögbauer–Grassberger estimation (<i>k</i> = 4, Chebyshev <i>L</i><sub>∞</sub>).
 
 ---
 
